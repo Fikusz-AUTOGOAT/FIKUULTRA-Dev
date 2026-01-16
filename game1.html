@@ -1,68 +1,160 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <title>The dark Quest - GameKU</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Gothic – HTML RPG</title>
+<style>
+body {
+    background: #0b0b0b;
+    color: #d4c29a;
+    font-family: monospace;
+    padding: 20px;
+}
+#game {
+    max-width: 700px;
+    margin: auto;
+    background: #141414;
+    padding: 20px;
+    border: 2px solid #3a2f1c;
+}
+button {
+    background: #2a2115;
+    color: #d4c29a;
+    border: 1px solid #5a4325;
+    padding: 10px;
+    margin: 5px 0;
+    width: 100%;
+    cursor: pointer;
+}
+button:hover {
+    background: #3a2f1c;
+}
+.stat {
+    margin: 5px 0;
+}
+</style>
 </head>
 <body>
-  <header>
-    <h1>🎮 The dark Quest</h1>
-    <nav>
-      <a href="index.html">⬅ Powrót</a>
-    </nav>
-  </header>
 
-  <main>
-    <section class="game-details">
-      <img src="99nawyspie.png" alt="Game 1" class="game-img">
-      <h2>The dark Quest</h2>
-      <p>Jesteś człowiekiem któremu zotało zlecone zwiedzenie tej wyspy, na wyspie spotykasz roznych ludzi złych i dobrych. Rózne przedmioty do zebrania.</p>
+<div id="game">
+    <h2>⚔️ Gothic – Kolonia Karna</h2>
+    <div id="stats"></div>
+    <hr>
+    <div id="text"></div>
+    <div id="choices"></div>
+</div>
 
-      <section class="system-requirements">
-  <h3>Wymagania systemowe (planowane)</h3>
-  <div class="requirements">
-    <div class="req-min">
+<script>
+let player = {
+    hp: 100,
+    maxHp: 100,
+    exp: 0,
+    lvl: 1,
+    dmg: 10
+};
 
-      
-      <h4>Rekomendowane:</h4>
-      <ul>
-        <li>System operacyjny: Windows 10 64-bit</li>
-        <li>Procesor: Ryzen 5 5500</li>
-        <li>Pamięć RAM: 4 GB</li>
-        <li>Karta graficzna: NVIDIA GeForce GTX 1650</li>
-        <li>Miejsce na dysku: 20 GB</li>
-        <li>DirectX: Wersja 11</li>
-      </ul>
-    </div>
-  </div>
-</section>
+function updateStats() {
+    document.getElementById("stats").innerHTML =
+        `<div class="stat">❤️ HP: ${player.hp}/${player.maxHp}</div>
+         <div class="stat">⭐ Level: ${player.lvl}</div>
+         <div class="stat">⚔️ Obrażenia: ${player.dmg}</div>
+         <div class="stat">📈 EXP: ${player.exp}</div>`;
+}
 
-      <a 
-        href="#" class="btn">📥 Pobierz</a>
-    </section>
+function show(text, choices) {
+    document.getElementById("text").innerHTML = text;
+    let c = document.getElementById("choices");
+    c.innerHTML = "";
+    choices.forEach(ch => {
+        let b = document.createElement("button");
+        b.innerText = ch.text;
+        b.onclick = ch.action;
+        c.appendChild(b);
+    });
+    updateStats();
+}
 
-    <section class="rating">
-      <h3>Oceń grę:</h3>
-      <button id="likeBtn1">👍 Like (<span id="likeCount1">0</span>)</button>
-      <button id="dislikeBtn1">👎 Dislike (<span id="dislikeCount1">0</span>)</button>
-    </section>
+function start() {
+    show(
+        "Budząc się w Kolonii Karnej, słyszysz krzyki strażników i szczęk mieczy.",
+        [
+            { text: "Rozejrzyj się", action: village },
+            { text: "Sprawdź swoje pięści", action: () => alert("Silne jak na nowego!") }
+        ]
+    );
+}
 
-    <section class="comments">
-      <h3>Komentarze</h3>
-      <form id="commentForm1">
-        <input type="text" id="username1" placeholder="Nick" required>
-        <textarea id="commentText1" placeholder="Twój komentarz..." required></textarea>
-        <button type="submit">Dodaj</button>
-      </form>
-      <ul id="commentList1"></ul>
-    </section>
-  </main>
+function village() {
+    show(
+        "Widzisz starego wojownika. Patrzy na ciebie podejrzliwie.",
+        [
+            { text: "Porozmawiaj z nim", action: talk },
+            { text: "Idź do lasu", action: forest }
+        ]
+    );
+}
 
-  <script src="script.js"></script>
-  <script>
-    initGamePage("1"); // ważne! każda gra ma swoje ID
-  </script>
+function talk() {
+    show(
+        "„Nowy? Jeśli chcesz przeżyć – naucz się walczyć.”",
+        [
+            { text: "Poproś o trening", action: train },
+            { text: "Odejdź", action: village }
+        ]
+    );
+}
+
+function train() {
+    player.dmg += 5;
+    show(
+        "Trening był brutalny, ale skuteczny. +5 obrażeń.",
+        [{ text: "Wróć", action: village }]
+    );
+}
+
+function forest() {
+    show(
+        "W lesie atakuje cię wilk!",
+        [{ text: "Walcz", action: fight }]
+    );
+}
+
+function fight() {
+    let wolfHp = 30;
+    let interval = setInterval(() => {
+        wolfHp -= player.dmg;
+        player.hp -= 8;
+
+        if (player.hp <= 0) {
+            clearInterval(interval);
+            show("Zginąłeś... Kolonia pochłania słabych.", [
+                { text: "Zacznij od nowa", action: () => location.reload() }
+            ]);
+        }
+
+        if (wolfHp <= 0) {
+            clearInterval(interval);
+            player.exp += 20;
+            if (player.exp >= 50) {
+                player.lvl++;
+                player.exp = 0;
+                player.maxHp += 20;
+                player.hp = player.maxHp;
+                player.dmg += 5;
+            }
+            show(
+                "Pokonałeś wilka. Zdobywasz doświadczenie.",
+                [{ text: "Wróć do obozu", action: village }]
+            );
+        }
+        updateStats();
+    }, 800);
+}
+
+start();
+</script>
+
 </body>
 </html>
+
 
