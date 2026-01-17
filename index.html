@@ -1,203 +1,143 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<title>Gothic 3D – Dolina</title>
-<style>
-body { margin:0; overflow:hidden; background:#05070d; }
-#hud {
- position:absolute; top:10px; left:10px;
- color:#e0d2a3; font-family:monospace;
- background:rgba(0,0,0,0.6); padding:10px;
-}
-#dialog {
- position:absolute;
- bottom:20px; left:50%;
- transform:translateX(-50%);
- width:60%;
- background:rgba(0,0,0,0.8);
- color:#e0d2a3;
- font-family:monospace;
- padding:15px;
- display:none;
- border:2px solid #5a4a2a;
-}
-</style>
+  <meta charset="UTF-8" />
+  <title>Mini NFS 3D – HTML</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+    #ui {
+      position: fixed;
+      top: 10px; left: 10px;
+      color: white;
+      font-family: Arial, sans-serif;
+      background: rgba(0,0,0,0.5);
+      padding: 10px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
+  <div id="ui">
+    <div>🚗 Mini NFS 3D</div>
+    <div>W / S – gaz / hamulec</div>
+    <div>A / D – skręt</div>
+    <div id="speed">Prędkość: 0 km/h</div>
+  </div>
 
-<div id="hud">WASD – ruch | E – rozmowa</div>
-<div id="dialog"></div>
+  <!-- Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.158/build/three.min.js"></script>
-<script>
-/* SCENA */
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0b1020);
-scene.fog = new THREE.Fog(0x0b1020,40,180);
+  <script>
+    // SCENA
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x000000, 50, 300);
 
-const camera = new THREE.PerspectiveCamera(75,innerWidth/innerHeight,0.1,500);
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled=true;
-document.body.appendChild(renderer.domElement);
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
 
-/* ŚWIATŁO */
-scene.add(new THREE.AmbientLight(0x555555));
-const sun = new THREE.DirectionalLight(0xffd9a0,1);
-sun.position.set(60,100,40);
-sun.castShadow=true;
-scene.add(sun);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
 
-/* TEREN – NATURALNE PAGÓRKI */
-const groundGeo = new THREE.PlaneGeometry(400,400,100,100);
-groundGeo.rotateX(-Math.PI/2);
-for(let i=0;i<groundGeo.attributes.position.count;i++){
- const x = groundGeo.attributes.position.getX(i);
- const z = groundGeo.attributes.position.getZ(i);
- const h = Math.sin(x*0.03)*2 + Math.cos(z*0.03)*2;
- groundGeo.attributes.position.setY(i,h);
-}
-groundGeo.computeVertexNormals();
+    // ŚWIATŁO
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(50, 100, 50);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-const groundMat = new THREE.MeshStandardMaterial({color:0x355f35});
-const ground = new THREE.Mesh(groundGeo,groundMat);
-ground.receiveShadow=true;
-scene.add(ground);
+    // DROGA
+    const roadGeo = new THREE.PlaneGeometry(50, 5000);
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+    const road = new THREE.Mesh(roadGeo, roadMat);
+    road.rotation.x = -Math.PI / 2;
+    road.position.z = -2000;
+    scene.add(road);
 
-/* DROGA */
-const road = new THREE.Mesh(
- new THREE.PlaneGeometry(8,120),
- new THREE.MeshStandardMaterial({color:0xc2b280})
-);
-road.rotation.x=-Math.PI/2;
-road.position.set(0,0.1,-30);
-scene.add(road);
+    // LINIE NA DRODZE
+    for (let i = 0; i < 200; i++) {
+      const lineGeo = new THREE.BoxGeometry(0.5, 0.1, 10);
+      const lineMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+      const line = new THREE.Mesh(lineGeo, lineMat);
+      line.position.y = 0.01;
+      line.position.z = -i * 25;
+      scene.add(line);
+    }
 
-/* ZAMEK / RUINY */
-function wall(x,z,w,h){
- const m = new THREE.Mesh(
-  new THREE.BoxGeometry(w,6,h),
-  new THREE.MeshStandardMaterial({color:0x555555})
- );
- m.position.set(x,3,z);
- m.castShadow=m.receiveShadow=true;
- scene.add(m);
-}
-wall(0,-90,30,2);
-wall(-15,-75,2,30);
-wall(15,-75,2,30);
+    // AUTO (PROSTE)
+    const car = new THREE.Group();
 
-const tower = new THREE.Mesh(
- new THREE.CylinderGeometry(6,6,12,8),
- new THREE.MeshStandardMaterial({color:0x4f4f4f})
-);
-tower.position.set(0,6,-90);
-tower.castShadow=true;
-scene.add(tower);
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(2, 1, 4),
+      new THREE.MeshStandardMaterial({ color: 0xff0000 })
+    );
+    body.position.y = 0.75;
+    car.add(body);
 
-/* DRZEWA */
-const trees=[];
-function tree(x,z){
- const t = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.6,0.8,4),
-  new THREE.MeshStandardMaterial({color:0x3b2a1a})
- );
- t.position.set(x,2,z);
- t.userData.radius=1;
- trees.push(t);
+    const cabin = new THREE.Mesh(
+      new THREE.BoxGeometry(1.5, 0.7, 2),
+      new THREE.MeshStandardMaterial({ color: 0x111111 })
+    );
+    cabin.position.set(0, 1.2, -0.3);
+    car.add(cabin);
 
- const l = new THREE.Mesh(
-  new THREE.SphereGeometry(2),
-  new THREE.MeshStandardMaterial({color:0x1f6f2a})
- );
- l.position.set(x,5,z);
+    car.position.y = 0.1;
+    scene.add(car);
 
- scene.add(t,l);
-}
-for(let i=0;i<90;i++)
- tree(Math.random()*300-150,Math.random()*300-150);
+    // KAMERA
+    camera.position.set(0, 5, 10);
+    camera.lookAt(car.position);
 
-/* GRACZ */
-const player = new THREE.Group();
-const body = new THREE.Mesh(new THREE.BoxGeometry(1,1.5,0.6),new THREE.MeshStandardMaterial({color:0x555555}));
-body.position.y=1.5;
-const head = new THREE.Mesh(new THREE.SphereGeometry(0.4),new THREE.MeshStandardMaterial({color:0x777777}));
-head.position.y=2.6;
-const legs = new THREE.Mesh(new THREE.BoxGeometry(0.8,1,0.5),body.material);
-legs.position.y=0.5;
-player.add(body,head,legs);
-player.position.set(0,3,40);
-scene.add(player);
+    // STEROWANIE
+    let speed = 0;
+    let maxSpeed = 2.5;
+    let accel = 0.05;
+    let turnSpeed = 0.04;
 
-/* NPC */
-const npc = new THREE.Mesh(
- new THREE.CapsuleGeometry(0.5,1.2),
- new THREE.MeshStandardMaterial({color:0x884444})
-);
-npc.position.set(2,3,20);
-scene.add(npc);
+    const keys = {};
+    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
 
-/* DIALOG */
-const dialogBox=document.getElementById("dialog");
-const dialogText=[
- "Nowy? Widać, że jeszcze nie znasz tego miejsca.",
- "Jeśli chcesz tu przeżyć – trzymaj się dróg.",
- "Las nie wybacza błędów."
-];
-let dialogIndex=0;
+    function updateCar() {
+      if (keys['w']) speed += accel;
+      if (keys['s']) speed -= accel * 1.5;
 
-/* STEROWANIE */
-let yaw=0;
-const keys={};
-addEventListener("keydown",e=>{
- keys[e.code]=true;
- if(e.code==="KeyE"){
-  if(player.position.distanceTo(npc.position)<3){
-   dialogBox.style.display="block";
-   dialogBox.innerText=dialogText[dialogIndex];
-   dialogIndex=(dialogIndex+1)%dialogText.length;
-  }
- }
-});
-addEventListener("keyup",e=>keys[e.code]=false);
+      speed *= 0.98;
+      speed = Math.max(-1, Math.min(speed, maxSpeed));
 
-document.body.onclick=()=>document.body.requestPointerLock();
-addEventListener("mousemove",e=>{
- if(document.pointerLockElement===document.body)
-  yaw-=e.movementX*0.002;
-});
+      if (keys['a']) car.position.x += turnSpeed * speed * -10;
+      if (keys['d']) car.position.x += turnSpeed * speed * 10;
 
-/* RAYCAST TERENU */
-const downRay=new THREE.Raycaster();
+      car.position.z -= speed;
 
-/* LOOP */
-function animate(){
- requestAnimationFrame(animate);
+      car.position.x = Math.max(-20, Math.min(20, car.position.x));
 
- const speed=0.12;
- const f=new THREE.Vector3(Math.sin(yaw),0,Math.cos(yaw));
- const r=new THREE.Vector3(Math.sin(yaw+Math.PI/2),0,Math.cos(yaw+Math.PI/2));
+      camera.position.z = car.position.z + 12;
+      camera.position.x += (car.position.x - camera.position.x) * 0.05;
+      camera.lookAt(car.position);
 
- if(keys.KeyW) player.position.add(f.clone().multiplyScalar(-speed));
- if(keys.KeyS) player.position.add(f.clone().multiplyScalar(speed));
- if(keys.KeyA) player.position.add(r.clone().multiplyScalar(speed));
- if(keys.KeyD) player.position.add(r.clone().multiplyScalar(-speed));
+      document.getElementById('speed').innerText =
+        'Prędkość: ' + Math.abs(Math.floor(speed * 80)) + ' km/h';
+    }
 
- downRay.set(new THREE.Vector3(player.position.x,50,player.position.z),new THREE.Vector3(0,-1,0));
- const hit=downRay.intersectObject(ground);
- if(hit.length>0) player.position.y=hit[0].point.y+1.5;
+    // LOOP
+    function animate() {
+      requestAnimationFrame(animate);
+      updateCar();
+      renderer.render(scene, camera);
+    }
 
- camera.position.set(
-  player.position.x+Math.sin(yaw)*7,
-  player.position.y+4,
-  player.position.z+Math.cos(yaw)*7
- );
- camera.lookAt(player.position);
+    animate();
 
- renderer.render(scene,camera);
-}
-animate();
-</script>
+    // RESPONSYWNOŚĆ
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
 </body>
 </html>
