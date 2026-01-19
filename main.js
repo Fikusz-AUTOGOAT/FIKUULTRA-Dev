@@ -1,16 +1,12 @@
-import { createScene } from "./scene.js";
-import { createWorld } from "./world.js";
-import { setupPlayer } from "./player.js";
+let last = performance.now();
 
-const { scene, camera, renderer } = createScene();
-createWorld(scene);
+function animate(now) {
+    const delta = (now - last) / 1000;
+    last = now;
 
-const updatePlayer = setupPlayer(camera, renderer);
-
-function animate() {
-    requestAnimationFrame(animate);
-    updatePlayer();
+    updatePlayer(delta);
     renderer.render(scene, camera);
+    requestAnimationFrame(animate);
 }
 
-animate();
+animate(performance.now());
