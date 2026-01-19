@@ -7,9 +7,9 @@ for (let i = 0; i < 50; i++) {
     });
 }
 
-function drawWorld(ctx, camera) {
+function drawWorld(ctx, camera, width, height) {
     ctx.fillStyle = "#1b5e20";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, width, height);
 
     ctx.fillStyle = "#2e7d32";
     trees.forEach(tree => {
