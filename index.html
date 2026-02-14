@@ -2,85 +2,129 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>CS2 Community Portal</title>
+    <title>CS2 Community Portal & Secret</title>
     <style>
         :root { --accent: #de9b35; }
         body, html { 
             margin: 0; padding: 0; height: 100%; 
             background: #0d1117; color: white; 
             font-family: 'Arial', sans-serif; overflow: hidden;
-            cursor: crosshair;
         }
 
-        /* Stylizacja strony w tle */
-        .content {
+        /* --- STRONA 1: FLASHBANG --- */
+        #page-flash {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100%; text-align: center; transition: filter 0.2s;
+            height: 100%; text-align: center;
         }
-        h1 { font-size: 3rem; margin-bottom: 10px; }
-        h1 span { color: var(--accent); }
-        .alert { color: var(--accent); font-weight: bold; border: 1px solid var(--accent); padding: 10px; border-radius: 5px; }
 
-        /* --- EFEKT FLASHBANGA --- */
-        #flash {
+        /* --- STRONA 2: JUMPSCARE (UKRYTA) --- */
+        #page-horror {
+            display: none; height: 100%; flex-direction: column;
+            align-items: center; justify-content: center; background: #000;
+        }
+
+        /* --- EFEKTY SPECJALNE --- */
+        #flash-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; opacity: 0; pointer-events: none; z-index: 9999;
+            background: white; opacity: 0; pointer-events: none; z-index: 10000;
+        }
+
+        #jumpscare-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: black; display: none; z-index: 20000;
+            justify-content: center; align-items: center;
+        }
+
+        #jumpscare-img {
+            width: 100%; height: 100%; object-fit: cover;
         }
 
         .whiteout { animation: flash-animation 5s forwards; }
+        @keyframes flash-animation { 0% { opacity: 1; } 5% { opacity: 1; } 100% { opacity: 0; } }
 
-        @keyframes flash-animation {
-            0% { opacity: 1; }
-            5% { opacity: 1; }
-            100% { opacity: 0; }
+        /* --- PRZYCISKI --- */
+        .btn-next {
+            position: fixed; bottom: 20px; right: 20px;
+            background: var(--accent); color: black; border: none;
+            padding: 10px 20px; font-weight: bold; cursor: pointer;
+            border-radius: 5px; z-index: 500; text-transform: uppercase;
         }
+
+        .trap-box {
+            border: 2px dashed #444; padding: 50px; cursor: pointer;
+            transition: 0.3s;
+        }
+        .trap-box:hover { border-color: red; background: rgba(255,0,0,0.1); }
+
+        .alert { color: var(--accent); font-weight: bold; margin: 20px; }
     </style>
 </head>
-<body onclick="throwFlash()">
+<body>
 
-    <div id="flash"></div>
+    <div id="flash-overlay"></div>
+    <div id="jumpscare-overlay">
+        <img id="jumpscare-img" src="https://files.catbox.moe/u6c547.jpg" alt="SCARY">
+    </div>
 
-    <audio id="snd-throw" src="https://www.myinstants.com/media/sounds/flashbang-sfx.mp3"></audio>
-    <audio id="snd-beep" src="https://www.myinstants.com/media/sounds/tinnitus.mp3"></audio>
+    <audio id="snd-flash" src="https://www.myinstants.com/media/sounds/flashbang-sfx.mp3"></audio>
+    <audio id="snd-tinnitus" src="https://www.myinstants.com/media/sounds/tinnitus.mp3"></audio>
+    <audio id="snd-scream" src="https://www.myinstants.com/media/sounds/screamer.mp3"></audio>
 
-    <div class="content" id="main-ui">
-        <img src="https://cdn.cloudflare.steamstatic.com/apps/csgo/images/csgo_react/social/cs2.jpg" width="400" style="border-radius: 10px; margin-bottom: 20px;">
+    <div id="page-flash" onclick="triggerFlash()">
+        <img src="https://cdn.cloudflare.steamstatic.com/apps/csgo/images/csgo_react/social/cs2.jpg" width="300" style="border-radius: 10px;">
         <h1>CS2 <span>HUB</span></h1>
-        <p class="alert">KLIKNIJ GDZIEKOLWIEK, ABY SPRAWDZIĆ RANKING</p>
-        <p style="color: #555; margin-top: 50px;">Ostatnia aktualizacja: przed chwilą</p>
+        <p class="alert">KLIKNIJ ABY SPRAWDZIĆ RANKING (FLASHBANG TRAP)</p>
+        <button class="btn-next" onclick="event.stopPropagation(); showHorrorPage();">Kolejna strona →</button>
+    </div>
+
+    <div id="page-horror">
+        <h1 style="color: red;">POZIOM 2: TEST REFLEKSU</h1>
+        <p>Kliknij w poniższy kwadrat, gdy zmieni kolor na zielony...</p>
+        <div class="trap-box" onclick="triggerJumpscare()">
+            <h2>CZEKAJ NA SYGNAŁ...</h2>
+        </div>
+        <p style="margin-top: 20px; color: #333;">(Ustaw głośność na max, żeby lepiej słyszeć sygnał)</p>
     </div>
 
     <script>
-        let flashed = false;
-
-        function throwFlash() {
-            if (flashed) return; // Tylko raz
-            flashed = true;
-
-            const flash = document.getElementById('flash');
-            const sndThrow = document.getElementById('snd-throw');
-            const sndBeep = document.getElementById('snd-beep');
-            const mainUi = document.getElementById('main-ui');
-
-            // 1. Dźwięk rzutu i wybuchu (ten konkretny link ma już opóźnienie wybuchu)
-            sndThrow.play();
-
-            // 2. Po ok. 1.5 sekundy (czas lotu granatu) następuje błysk
+        // FUNKCJA FLASHBANGA
+        function triggerFlash() {
+            const flash = document.getElementById('flash-overlay');
+            const snd = document.getElementById('snd-flash');
+            const tin = document.getElementById('snd-tinnitus');
+            
+            snd.play();
             setTimeout(() => {
                 flash.classList.add('whiteout');
-                sndBeep.play();
-                
-                // Rozmycie interfejsu w tle
-                mainUi.style.filter = "blur(10px)";
-                
-                // Powrót do normalności po 5 sekundach
+                tin.play();
                 setTimeout(() => {
-                    mainUi.style.filter = "blur(0px)";
-                    flashed = false;
                     flash.classList.remove('whiteout');
                 }, 5000);
-            }, 100); 
-            // Uwaga: Ustawiłem 100ms bo link do audio ma już w sobie "Fire in the hole!" i wybuch.
+            }, 100);
+        }
+
+        // PRZEŁĄCZANIE STRON
+        function showHorrorPage() {
+            document.getElementById('page-flash').style.display = 'none';
+            document.getElementById('page-horror').style.display = 'flex';
+        }
+
+        // FUNKCJA JUMPSCARE
+        function triggerJumpscare() {
+            const overlay = document.getElementById('jumpscare-overlay');
+            const scream = document.getElementById('snd-scream');
+            
+            // Nagłe pokazanie strasznej mordy i ryk
+            overlay.style.display = 'flex';
+            scream.play();
+
+            // Opcjonalnie: wibracje (jeśli na telefonie)
+            if (navigator.vibrate) navigator.vibrate([500, 100, 500]);
+
+            // Po 3 sekundach usuwamy jumpscare, żeby ofiara mogła odetchnąć
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 3000);
         }
     </script>
 </body>
