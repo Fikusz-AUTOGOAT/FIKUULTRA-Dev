@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>CS2 Community | System</title>
+    <title>CS2 Community Portal</title>
     <style>
         :root { --accent: #de9b35; }
         body, html { 
@@ -11,13 +11,13 @@
             font-family: 'Arial', sans-serif; overflow: hidden;
         }
 
-        /* --- STRONA 1: FLASHBANG --- */
+        /* --- STRONA 1: FLASH --- */
         #page-flash {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100%; text-align: center;
         }
 
-        /* --- STRONA 2: JUMPSCARE --- */
+        /* --- STRONA 2: HORROR --- */
         #page-horror {
             display: none; height: 100%; flex-direction: column;
             align-items: center; justify-content: center; background: #000;
@@ -35,12 +35,11 @@
             justify-content: center; align-items: center;
         }
 
-        #jumpscare-img { width: 100%; height: 100%; object-fit: cover; }
+        #jumpscare-img { width: 100%; height: 100%; object-fit: contain; }
 
         .whiteout { animation: flash-animation 4s forwards; }
         @keyframes flash-animation { 0% { opacity: 1; } 5% { opacity: 1; } 100% { opacity: 0; } }
 
-        /* --- PRZYCISKI --- */
         .btn-next {
             position: fixed; bottom: 20px; right: 20px;
             background: var(--accent); color: black; border: none;
@@ -52,7 +51,6 @@
             border: 3px dashed #333; padding: 60px; cursor: pointer;
             border-radius: 15px; transition: 0.2s;
         }
-        .trap-box:hover { border-color: #ff0000; background: #110000; }
     </style>
 </head>
 <body>
@@ -60,181 +58,54 @@
     <div id="flash-overlay"></div>
     
     <div id="jumpscare-overlay">
-        <img id="jumpscare-img" src="https://api.v1.n-content.com/placeholder/1920/1080/horror" alt="BOO!">
+        <img id="jumpscare-img" src="http://googleusercontent.com/image_collection/image_retrieval/2621726362702915673_0" alt="JUMPSCARE">
     </div>
 
     <audio id="snd-flash" src="https://www.myinstants.com/media/sounds/flashbang-sfx.mp3"></audio>
     <audio id="snd-scream" src="https://www.myinstants.com/media/sounds/screamer.mp3"></audio>
 
     <div id="page-flash" onclick="triggerFlash()">
-        <img src="https://cdn.cloudflare.steamstatic.com/apps/csgo/images/csgo_react/social/cs2.jpg" width="300" style="border-radius: 10px; border: 1px solid #333;">
-        <h1>CS2 <span>PRO HUB</span></h1>
-        <p style="color: var(--accent);">KLIKNIJ ABY SPRAWDZIĆ PING</p>
+        <img src="https://cdn.cloudflare.steamstatic.com/apps/csgo/images/csgo_react/social/cs2.jpg" width="300" style="border-radius: 10px;">
+        <h1>CS2 HUB <span>PRIVATE</span></h1>
+        <p style="color: var(--accent);">KLIKNIJ ABY SPRAWDZIĆ POŁĄCZENIE</p>
         <button class="btn-next" onclick="event.stopPropagation(); showHorrorPage();">Kolejna strona →</button>
     </div>
 
     <div id="page-horror">
-        <h1 style="color: #ff0000; font-size: 2.5rem;">UWAGA!</h1>
-        <p>System wykrył błąd w Twoim profilu. Kliknij w pole poniżej, aby naprawić pliki:</p>
+        <h1 style="color: red;">POZIOM 2: TEST PLIKÓW</h1>
         <div class="trap-box" onclick="triggerJumpscare()">
-            <h2>[ NAPRAW PROFIL ]</h2>
+            <h2>[ SKANUJ SYSTEM ]</h2>
         </div>
     </div>
 
     <script>
-        // Funkcja Flasha
         function triggerFlash() {
             const flash = document.getElementById('flash-overlay');
             const snd = document.getElementById('snd-flash');
             snd.currentTime = 0;
             snd.play();
             flash.classList.remove('whiteout');
-            void flash.offsetWidth; // Reset animacji
+            void flash.offsetWidth; 
             flash.classList.add('whiteout');
         }
 
-        // Zmiana strony
         function showHorrorPage() {
             document.getElementById('page-flash').style.display = 'none';
             document.getElementById('page-horror').style.display = 'flex';
         }
 
-        // Jumpscare
         function triggerJumpscare() {
             const overlay = document.getElementById('jumpscare-overlay');
             const scream = document.getElementById('snd-scream');
             
-            // Podmiana na wypadek gdyby pierwszy link padł (fallback)
-            document.getElementById('jumpscare-img').src = "https://static.wikia.nocookie.net/creepypasta/images/e/e5/Jeff_the_Killer.jpg";
-
             overlay.style.display = 'flex';
             scream.currentTime = 0;
             scream.play();
 
-            // Ukryj po 4 sekundach
+            // Automatyczne schowanie po 3 sekundach
             setTimeout(() => {
                 overlay.style.display = 'none';
-            }, 4000);
-        }
-    </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>CS2 Community | System</title>
-    <style>
-        :root { --accent: #de9b35; }
-        body, html { 
-            margin: 0; padding: 0; height: 100%; 
-            background: #0d1117; color: white; 
-            font-family: 'Arial', sans-serif; overflow: hidden;
-        }
-
-        /* --- STRONA 1: FLASHBANG --- */
-        #page-flash {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100%; text-align: center;
-        }
-
-        /* --- STRONA 2: JUMPSCARE --- */
-        #page-horror {
-            display: none; height: 100%; flex-direction: column;
-            align-items: center; justify-content: center; background: #000;
-        }
-
-        /* --- OVERLAYE --- */
-        #flash-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; opacity: 0; pointer-events: none; z-index: 10000;
-        }
-
-        #jumpscare-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: black; display: none; z-index: 20000;
-            justify-content: center; align-items: center;
-        }
-
-        #jumpscare-img { width: 100%; height: 100%; object-fit: cover; }
-
-        .whiteout { animation: flash-animation 4s forwards; }
-        @keyframes flash-animation { 0% { opacity: 1; } 5% { opacity: 1; } 100% { opacity: 0; } }
-
-        /* --- PRZYCISKI --- */
-        .btn-next {
-            position: fixed; bottom: 20px; right: 20px;
-            background: var(--accent); color: black; border: none;
-            padding: 12px 25px; font-weight: bold; cursor: pointer;
-            border-radius: 5px; z-index: 500;
-        }
-
-        .trap-box {
-            border: 3px dashed #333; padding: 60px; cursor: pointer;
-            border-radius: 15px; transition: 0.2s;
-        }
-        .trap-box:hover { border-color: #ff0000; background: #110000; }
-    </style>
-</head>
-<body>
-
-    <div id="flash-overlay"></div>
-    
-    <div id="jumpscare-overlay">
-        <img id="jumpscare-img" src="https://api.v1.n-content.com/placeholder/1920/1080/horror" alt="BOO!">
-    </div>
-
-    <audio id="snd-flash" src="https://www.myinstants.com/media/sounds/flashbang-sfx.mp3"></audio>
-    <audio id="snd-scream" src="https://www.myinstants.com/media/sounds/screamer.mp3"></audio>
-
-    <div id="page-flash" onclick="triggerFlash()">
-        <img src="https://cdn.cloudflare.steamstatic.com/apps/csgo/images/csgo_react/social/cs2.jpg" width="300" style="border-radius: 10px; border: 1px solid #333;">
-        <h1>CS2 <span>PRO HUB</span></h1>
-        <p style="color: var(--accent);">KLIKNIJ ABY SPRAWDZIĆ PING</p>
-        <button class="btn-next" onclick="event.stopPropagation(); showHorrorPage();">Kolejna strona →</button>
-    </div>
-
-    <div id="page-horror">
-        <h1 style="color: #ff0000; font-size: 2.5rem;">UWAGA!</h1>
-        <p>System wykrył błąd w Twoim profilu. Kliknij w pole poniżej, aby naprawić pliki:</p>
-        <div class="trap-box" onclick="triggerJumpscare()">
-            <h2>[ NAPRAW PROFIL ]</h2>
-        </div>
-    </div>
-
-    <script>
-        // Funkcja Flasha
-        function triggerFlash() {
-            const flash = document.getElementById('flash-overlay');
-            const snd = document.getElementById('snd-flash');
-            snd.currentTime = 0;
-            snd.play();
-            flash.classList.remove('whiteout');
-            void flash.offsetWidth; // Reset animacji
-            flash.classList.add('whiteout');
-        }
-
-        // Zmiana strony
-        function showHorrorPage() {
-            document.getElementById('page-flash').style.display = 'none';
-            document.getElementById('page-horror').style.display = 'flex';
-        }
-
-        // Jumpscare
-        function triggerJumpscare() {
-            const overlay = document.getElementById('jumpscare-overlay');
-            const scream = document.getElementById('snd-scream');
-            
-            // Podmiana na wypadek gdyby pierwszy link padł (fallback)
-            document.getElementById('jumpscare-img').src = "https://static.wikia.nocookie.net/creepypasta/images/e/e5/Jeff_the_Killer.jpg";
-
-            overlay.style.display = 'flex';
-            scream.currentTime = 0;
-            scream.play();
-
-            // Ukryj po 4 sekundach
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 4000);
+            }, 3000);
         }
     </script>
 </body>
